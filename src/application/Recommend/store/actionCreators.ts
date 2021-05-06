@@ -1,7 +1,43 @@
+// 放不同的action的地方
 import { fromJS } from "immutable";
 import * as actionTypes from './constants';
+import { getBannerRequest, getRecommendListRequest } from '../../../api/request';
 
-export const changerBannerList = (data:object) => ({
+// 定义
+export const changeBannerList = (data) => ({
   type: actionTypes.CHANGE_BANNER,
   data: fromJS(data)
 })
+
+export const changeRecommendList = (data) => ({
+  type: actionTypes.CHANGE_RECOMMEND_LIST,
+  data: fromJS(data)
+})
+
+export const changeEnterLoading = (data) => ({
+  type: actionTypes.CHANGE_ENTER_LOADING,
+  data //简单的data无需转为immutate模式
+})
+
+export const getBannerList = () => {
+  return (dispatch) => {
+    getBannerRequest().then((data: any) => {
+      dispatch(changeBannerList(data.banners));
+    }).catch((e) => {
+      console.error(e)
+      console.log( "轮播图数据传输错误");
+    })
+  }
+};
+
+// 获取歌单之后就把loading变为false
+export const getRecommendList = () => {
+  return (dispatch) => {
+    getRecommendListRequest().then((data:any) => {
+      dispatch(changeRecommendList(data.result ));
+      dispatch(changeEnterLoading(false));  //改变loading
+    }).catch(() => {
+      console.log("推荐歌单数据传输错误");
+    });
+  }
+};

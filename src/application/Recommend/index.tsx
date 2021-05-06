@@ -1,42 +1,64 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Slider from '../../components/slider';
 import RecommendList from '../../components/list';
 import Scroll from '../../baseUI/scroll/index';
 import styled from 'styled-components';
+import { connect } from 'react-redux';
+import * as actionTypes from './store/actionCreators';
+import { forceCheck } from 'react-lazyload';
+import {Content} from './style';
+import Loading from '../../baseUI/loading';
 
-export const Content = styled.div`
-  position: fixed;
-  top: 90px;
-  bottom: 0;
-  width: 100%;
-`
+const Recommend = (props) => {
+  const { bannerList, recommendList, enterLoading } = props
+  const { getBannerDataDispatch, getRecommendDataDispatch} = props;
 
-
-const Recommend = () => {
-  // mock数据
-  const bannerList = [1, 2, 3, 4, 5].map((item) => {
-    return { imageUrl: 'http://p1.music.126.net/ZYLJ2oZn74yUz5x8NBGkVA==/109951164331219056.jpg' }
-  })
-
-  const recommendList = [1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12].map((item) => {
-    return {
-      id: 1,
-      picUrl:"https://p1.music.126.net/fhmefjUfMD-8qtj3JKeHbA==/18999560928537533.jpg",
-      playCount:11117243,
-      name: "[话语速歌爆红]全新演绎热门剧集中文推广曲"
+  useEffect(() => {
+    // 如果页面有数据，则不发请求
+    // immutable 数据结构中长度属性 size
+    if (!bannerList.size) {
+      getBannerDataDispatch();
     }
-  })
+    if (!recommendList.size) {
+      getRecommendDataDispatch()
+    }
+    // eslint-disable-next-line
+  }, [])
+
+  const bannerListJS = bannerList ? bannerList.toJS() : [];
+  const recommendListJS  = recommendList ? recommendList.toJS() : [];
 
   return (
     <Content>
-      <Slider bannerList={bannerList}></Slider>
-      <Scroll onScroll={(e) => console.log(e)}>
+      <Slider bannerList={bannerListJS}></Slider>
+      <Scroll onScroll={forceCheck}>
         <div>
-          <RecommendList recommendList={recommendList}></RecommendList>
+          <RecommendList recommendList={recommendListJS}></RecommendList>
         </div>
       </Scroll>
+      { enterLoading ? <Loading></Loading> : null }
     </Content>
-  )
+  );
 }
 
-export default React.memo(Recommend)
+  // 映射Redux全局的state到组件的props上
+  const mapStateToProps = (state) => ({
+    // 不要再这里将数据toJS,不然每次diff比对props的时候都是不一样的引用，还是导致不必要的重渲染, 属于滥用immutable
+    bannerList: state.getIn(['recommend', 'bannerList']),
+    recommendList: state.getIn(['recommend', 'recommendList']),
+    enterLoading: state.getIn(['recommend', 'enterLoading'])//简单数据类型不需要调用toJS
+  });
+  // 映射dispatch到props上
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      getBannerDataDispatch() {
+        dispatch(actionTypes.getBannerList());
+      },
+      getRecommendDataDispatch() {
+        dispatch(actionTypes.getRecommendList());
+      },
+    }
+  }
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(React.memo(Recommend))
