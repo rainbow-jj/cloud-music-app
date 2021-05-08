@@ -4,10 +4,10 @@ import style from '../../assets/global-style';
 
 const loading = keyframes`
   0% 100% {
-    transform: scale(0.0)
+    transform: scale 0.0
   }
   50% {
-    transform: scale(1.0)
+    transform: scale 1.0
   }
 `
 const LoadingWrapper = styled.div`
@@ -30,11 +30,17 @@ const LoadingWrapper = styled.div`
     animation-delay: -0.7s;
   }
 `
+interface LoadingProps {
+  show?: boolean
+}
 
-function Loading () {
-  
+const defaultProps: LoadingProps = {
+  show: true
+};
+function Loading(props: LoadingProps = defaultProps) {
+  const { show } = props;
   return (
-    <LoadingWrapper>
+    <LoadingWrapper style={show ? {display: ""}: {display: "none"}}>
       <div></div>
       <div></div>
     </LoadingWrapper>

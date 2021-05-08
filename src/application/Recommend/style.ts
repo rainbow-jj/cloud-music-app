@@ -6,4 +6,5 @@ export const Content = styled.div`
   top: 90px;
   bottom: 0;
   width: 100%;
+  
 `
