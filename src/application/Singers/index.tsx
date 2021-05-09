@@ -1,4 +1,6 @@
-import React, { useState, useEffect} from 'react';
+import React, {
+  useState, useEffect, useContext
+} from 'react';
 import Horizon from '../../baseUI/horizon-item';
 import { categoryTypes, alphaTypes } from '../../api/config';
 import { NavContainer, List,ListContainer, ListItem } from './style';
@@ -16,10 +18,15 @@ import {
 import { connect } from 'react-redux';
 import LazyLoad, { forceCheck } from 'react-lazyload';
 import Loading from '../../baseUI/loading';
+import { CategoryDataContext } from './data';
+import { CHANGE_CATEGORY, CHANGE_ALPHA, Data } from './data';
 
 function Singers(props) {
-  let [category, setCategory] = useState('');
-  let [alpha, setAlpha] = useState('');
+  // let [category, setCategory] = useState('');
+  // let [alpha, setAlpha] = useState('');
+  const { data, dispatch }:any = useContext(CategoryDataContext);
+  const {category, alpha} = data.toJS();
+
   const { singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount} = props;
   const { getHotSingerDispatch, updateDispatch, pullDownRefreshDispatch, pullUpRefreshDispatch } = props;
 
@@ -30,12 +37,12 @@ function Singers(props) {
 
 
   let handleUpdateAlpha = (val) => {
-    setAlpha(val);
+    dispatch({ type: CHANGE_ALPHA, data: val });
     updateDispatch(category, val);
   };
 
   let handleUpdateCatetory = (val) => {
-    setCategory(val);
+    dispatch({ type: CHANGE_CATEGORY, data: val });
     updateDispatch(val, alpha);
   };
 
@@ -47,7 +54,6 @@ function Singers(props) {
     pullDownRefreshDispatch(category, alpha)
   }
 
-  
 
   // 渲染函数，返回歌手列表
   const renderSingerList = () => {

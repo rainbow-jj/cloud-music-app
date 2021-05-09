@@ -8,6 +8,7 @@ import { forceCheck } from 'react-lazyload';
 import { Content } from './style';
 import Loading from '../../baseUI/loading';
 import BScroll from "better-scroll"
+import { renderRoutes } from 'react-router-config';
 
 const Recommend = (props) => {
   const scrollRef = useRef<any>(null);
@@ -29,95 +30,16 @@ const Recommend = (props) => {
   const bannerListJS = bannerList ? bannerList.toJS() : [];
   const recommendListJS  = recommendList ? recommendList.toJS() : [];
 
-
-  useEffect(() => {
-    console.log('scrollRef.current: ', scrollRef.current);
-    // console.log('scrollContaninerRef: ', scrollContaninerRef.current);
-    const scroll: any = new BScroll(scrollRef.current, {
-      // scrollX: direction === "horizontal",
-      scrollX: true,
-      // scrollY: direction === "vertical",
-      probeType: 3,
-      click: true,
-      // bounce: {
-      //   top: bounceTop,
-      //   bottom: bounceBottom
-      // }
-    });
-    return () => {
-      // if (bScrollState) bScrollState = null;
-    }
-    // eslint-disable-next-line
-  }, []);
-
   return (
     <Content>
       <Scroll direction={"vertical"} onScroll={forceCheck}>
         <div > 
-      {/* <div ref={scrollRef} style={{ height: '100%' }}>
-        <div className="inner">
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-          <div>1</div>
-        </div>  */}
           <Slider bannerList={bannerListJS}></Slider> 
           <RecommendList recommendList={recommendListJS}></RecommendList> 
       </div>
       </Scroll>
       { enterLoading ? <Loading></Loading> : null }
+      {renderRoutes(props.route.routes)}
     </Content>
   );
 }

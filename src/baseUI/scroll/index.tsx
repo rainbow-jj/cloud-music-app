@@ -52,6 +52,7 @@ const Scroll = (props: ScrollProps = defaultProps, ref: React.ForwardedRef<any>)
   },[pullDown]);
 
   useEffect(() => {
+    if (!scrollContaninerRef.current) return;
     console.log('scrollContaninerRef: ', scrollContaninerRef.current);
     const scroll:any = new BScroll(scrollContaninerRef.current, {
       scrollX: direction === "horizontal",

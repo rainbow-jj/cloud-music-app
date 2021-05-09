@@ -2,8 +2,14 @@ import React from 'react';
 import { ListWrapper, List, ListItem } from './style';
 import LazyLoad from 'react-lazyload';
 import {getCount} from '../../api/utils';
+import { useHistory, withRouter } from 'react-router-dom';
 
 function RecommendList (props:any) {
+  const history = useHistory();
+  // 点击路由跳转 
+  const enterDetail = (id) => {
+    history.push(`/recommend/${id}`)
+  }
 
   return (
     <ListWrapper>
@@ -12,7 +18,7 @@ function RecommendList (props:any) {
         {
           props.recommendList.map((item:any, index:number) => {
             return (
-              <ListItem key={item.id + index}>
+              <ListItem key={item.id + index} onClick={() => enterDetail(item.id)}>
                 <div className="img_wrapper">
                   {/* decorate 给图片上的图标和文字提供一个遮罩 */}
                   <div className="decorate"></div>
