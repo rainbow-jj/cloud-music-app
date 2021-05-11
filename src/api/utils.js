@@ -1,4 +1,3 @@
-import { getRankList } from "../application/Rank/store";
 
 // 把数字转为万的小工具
 export const getCount = (count) => {
@@ -38,3 +37,11 @@ export const filterIndex = rankList => {
 // 判断一个对象是否为空
 export const isEmptyObject = obj => !obj || Object.keys(obj).length === 0;
 
+export const getName = list => {
+  let str = "";
+  list.map((item, index) => {
+    str += index === 0 ? item.name: '/' + item.name;
+    return item;
+  });
+  return str;
+}

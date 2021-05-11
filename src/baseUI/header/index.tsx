@@ -19,7 +19,7 @@ const marquee = keyframes`
 interface HeaderProps {
   handleClick?: () => void,
   title?: string
-  className: string
+  className?: string
 }
 
 const defaultProps: HeaderProps = {

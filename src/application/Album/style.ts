@@ -3,6 +3,7 @@ import style from '../../assets/global-style';
 
 
 export const Container = styled.div`
+  
   position: fixed;
   top: 0;
   left: 0;

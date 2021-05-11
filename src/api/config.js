@@ -186,3 +186,6 @@ export const alphaTypes = [{
 ];
 
 export {axiosInstance};
+
+// 固定的顶部高度HEADER_HEIGHT = 45;
+export  const HEADER_HEIGHT = 45;

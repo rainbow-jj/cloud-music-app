@@ -2,7 +2,7 @@ import React from 'react';
 import { ListWrapper, List, ListItem } from './style';
 import LazyLoad from 'react-lazyload';
 import {getCount} from '../../api/utils';
-import { useHistory, withRouter } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 
 function RecommendList (props:any) {
   const history = useHistory();
