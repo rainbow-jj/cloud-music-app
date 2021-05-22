@@ -2,8 +2,7 @@ import styled from 'styled-components';
 import style from '../../assets/global-style';
 
 
-export const Container = styled.div`
-  
+export const Container = styled.div<any>`
   position: fixed;
   top: 0;
   left: 0;

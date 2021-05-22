@@ -16,9 +16,9 @@ function RecommendList (props:any) {
       <h1 className="title">推荐歌单</h1>
       <List>
         {
-          props.recommendList.map((item:any, index:number) => {
+          props.recommendList.map((item:any) => {
             return (
-              <ListItem key={item.id + index} onClick={() => enterDetail(item.id)}>
+              <ListItem key={item.id } onClick={() => enterDetail(item.id)}>
                 <div className="img_wrapper">
                   {/* decorate 给图片上的图标和文字提供一个遮罩 */}
                   <div className="decorate"></div>

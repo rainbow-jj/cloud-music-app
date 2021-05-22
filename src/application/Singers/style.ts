@@ -10,7 +10,7 @@ export const NavContainer = styled.div`
   overflow: hidden;
   
 `;
-export const ListContainer = styled.div`
+export const ListContainer = styled.div<any>`
   position: fixed;
   top: 160px;
   left: 0;

@@ -1,24 +1,23 @@
 import React from 'react';
 import { SongList, SongItem } from "./style";
 import { getName } from '../../api/utils';
+import { changeCurrentIndex, changePlayList, changeSequencePlayList } from '../Player/store/actionCreators';
+// urrentIndex, changeSequecePlayList } from '../../application/Player/store/actionCreators.ts';
+import { connect } from 'react-redux'
 
 const SongsList = React.forwardRef((props:any, refs:any)=> {
 
   const { showCollect, collectCount, songs } = props;
-
+  const { changePlayListDispatch, 
+    musicAnimation, 
+    changeSequencePlayListDispatch, changeCurrentIndexDispatch } = props;
   const totalCount = songs.length;
 
   const selectItem = (e, index: number) =>  {
-    console.log(e)
-  }
-  
-  const collect = (count) => {
-    return (
-      <div className="add_list">
-        <i className="iconfont">&#xe62d;</i>
-        <span>收藏({Math.floor(count/1000)/10}万</span>
-      </div>
-    )
+    changePlayListDispatch(songs)
+    changeSequencePlayListDispatch(songs)
+    changeCurrentIndexDispatch(index)
+    musicAnimation(e.nativeEvent.clientX, e.nativeEvent.clientY)
   }
 
   let songList = (list) => {
@@ -40,11 +39,22 @@ const SongsList = React.forwardRef((props:any, refs:any)=> {
     return res;
   }
 
+  const collect = (count) => {
+    return (
+      <div className="add_list">
+        <i className="iconfont">&#xe62d;</i>
+        <span>收藏({Math.floor(count / 1000) / 10}万</span>
+      </div>
+    )
+  }
+
   return (
     <SongList ref={refs} showBackground={props.showBackground}>
       <div className="first_line">
-        <i className="iconfont">&#xe6e3;</i>
-        <span>播放全部<span className="sum">(共{totalCount}首)</span></span>
+        <div className="play_all" onClick={(e) => selectItem(e, 0)}>
+          <i className="iconfont">&#xe6e3;</i>
+          <span>播放全部<span className="sum">(共{totalCount}首)</span></span>
+        </div>
       </div>
       { showCollect ? collect(collectCount) : null}
       <SongItem>
@@ -54,4 +64,18 @@ const SongsList = React.forwardRef((props:any, refs:any)=> {
   )
 });
 
-export default React.memo(SongsList);
+const mapDispatchToProps = (dispatch) => {
+  return {
+    changePlayListDispatch(data){
+      dispatch(changePlayList(data))
+    },
+    changeCurrentIndexDispatch(data){
+      dispatch(changeCurrentIndex(data))
+    },
+    changeSequencePlayListDispatch(data){
+      dispatch(changeSequencePlayList(data))
+    }
+  }
+}
+
+export default connect(null, mapDispatchToProps)(React.memo(SongsList));

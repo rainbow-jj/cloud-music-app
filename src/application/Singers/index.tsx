@@ -29,7 +29,7 @@ function Singers(props) {
   const { data, dispatch }:any = useContext(CategoryDataContext);
   const {category, alpha} = data.toJS();
   const history = useHistory();
-  const { singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount} = props;
+  const { singerList, enterLoading, pullUpLoading, pullDownLoading, pageCount, songsCount} = props;
   const { getHotSingerDispatch, updateDispatch, pullDownRefreshDispatch, pullUpRefreshDispatch } = props;
 
   useEffect(() => {
@@ -89,7 +89,7 @@ function Singers(props) {
         <Horizon oldVal={category} list={categoryTypes} handleClick={handleUpdateCatetory} title={"分类（默认热门）"}></Horizon>
         <Horizon oldVal={alpha} list={alphaTypes} handleClick={handleUpdateAlpha} title={" 首字母 "}></Horizon>
       </NavContainer>
-      <ListContainer>
+      <ListContainer play={songsCount}>
         <Scroll direction={"vertical"}
           pullUp={ handlePullUp }
           pullDown={ handlePullDown}
@@ -111,7 +111,8 @@ const mapStateToProps = (state) => ({
   enterLoading: state.getIn(['singers', 'enterLoading']), //控制进场Loading
   pullUpLoading: state.getIn(['singers', 'pullUpLoading']), //控制上拉加载动画
   pullDownLoading: state.getIn(['singers', 'pullDownLoading']),//控制下拉加载动画
-  pageCount: state.getIn(['singers', 'pageCount'])
+  pageCount: state.getIn(['singers', 'pageCount']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = (dispatch) => {

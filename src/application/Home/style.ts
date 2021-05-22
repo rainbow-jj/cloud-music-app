@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import style from '../../assets/global-style';
 
 export const Top = styled.div`
-  dispaly: flex;
+  display: flex;
   flex-direction: row;
   justify-content: space-between;
   padding: 5px 10px;

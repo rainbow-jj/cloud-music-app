@@ -8,14 +8,15 @@ import {HEADER_HEIGHT} from '../../api/config';
 import {connect} from 'react-redux';
 import { changeLoading, getSongerInfo } from './store/actionCreators';
 import Loading from '../../baseUI/loading';
+import MusicNote from "../../baseUI/music-note/index";
 
 function Singer(props) {
-  const [showStatus, setShowStatus] = useState(true);
-  const { artist: immutableArtist, songs: immutableSongs, loading, getSingerDataDispatch} = props;
+  const { artist: immutableArtist, songs: immutableSongs, loading, getSingerDataDispatch, songsCount} = props;
 
   const artist = immutableArtist.toJS();
   const songs = immutableSongs.toJS();
 
+  const [showStatus, setShowStatus] = useState(true);
   const collectButton = useRef<any>(); 
   const imageWrapper = useRef<any>();
   const songScrollWrapper = useRef<any>();
@@ -24,9 +25,22 @@ function Singer(props) {
   const layer = useRef<any>();
   // 图片初始高度
   const initialHeight = useRef<any>(0);
+  const musicNoteRef = useRef<any>();
 
   // 往上偏移的尺寸
   const OFFSET = 5;
+
+  useEffect(() => {
+    const id = props.match.params.id;
+    getSingerDataDispatch(id)
+    let h = imageWrapper.current.offsetHeight;
+    initialHeight.current = h;
+    songScrollWrapper.current.style.top = `${h - OFFSET}px`;
+    //把遮罩先放在下面，以裹住歌曲列表
+    layer.current.style.top = `${h - OFFSET}px`;
+    songScroll.current.refresh();
+    // eslint-disable-next-line
+  }, []);
 
   const handleScroll = (pos: any) => {
     let height = initialHeight.current;
@@ -73,22 +87,13 @@ function Singer(props) {
     
   }
   
-  useEffect(() => {
-    const id = props.match.params.id;
-    getSingerDataDispatch(id)
-    let h = imageWrapper.current.offsetHeight;
-    initialHeight.current = h;
-    songScrollWrapper.current.style.top = `${h - OFFSET}px`;
-    //把遮罩先放在下面，以裹住歌曲列表
-    layer.current.style.top = `${h - OFFSET}px`;
-    songScroll.current.refresh();
-    // eslint-disable-next-line
-  }, []);
-
   const setShowStatusFalse = useCallback(() => {
     setShowStatus(false)
   },[]);
 
+  const musicAnimation = (x, y) => {
+    musicNoteRef.current.startAnimation({x, y});
+  }
   return (
     <div>
       <CSSTransition
@@ -98,7 +103,7 @@ function Singer(props) {
         appear={true}
         onExited={() => props.history.goBack()}
       >
-        <Container>
+        <Container play={songsCount}>
           <Header ref={header} handleClick={setShowStatusFalse} title={"头部"} ></Header>
           <ImgWrapper ref={imageWrapper} bgUrl={artist.picUrl}>
             <div className="filter"></div>
@@ -113,10 +118,12 @@ function Singer(props) {
               <SongsList
                 songs={songs}
                 showCollect={false}
+                musicAnimation={musicAnimation}
               ></SongsList>
             </Scroll>
           </SongListWrapepr>
           {loading ? (<Loading></Loading>) : null}
+          <MusicNote ref={musicNoteRef}></MusicNote>
         </Container>
       </CSSTransition>
     </div>
@@ -126,7 +133,8 @@ function Singer(props) {
 const mapStateToProps = state => ({
   artist:state.getIn(['singerInfo', 'artist']),
   songs: state.getIn(['singerInfo', 'songOfArtist']),
-  loading: state.getIn(['singerInfo', 'loading'])
+  loading: state.getIn(['singerInfo', 'loading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = dispatch => {

@@ -8,22 +8,17 @@ import { EnterLoading } from '../Singers/style';
 import Loading from '../../baseUI/loading';
 import { renderRoutes } from 'react-router-config';
 
-// interface RankProps  {
-//   globalRank: any,
-//   rankList?: any,
-//   loading?: boolean,
-//   getRankListDataDispatch,
-//   tracks: any
-// }
 
 const Rank = (props) => {
-  const {rankList:list, loading} = props;
+  const {rankList:list, loading, songsCount } = props;
   const { getRankListDataDispatch } = props;
 
   let rankList = list ? list.toJS() : [];
 
   useEffect(() => {
-    getRankListDataDispatch()
+    if(!rankList.length) {
+      getRankListDataDispatch()
+    }
   },[]);
 
   // 数据处理 官方网和全球榜
@@ -36,7 +31,7 @@ const Rank = (props) => {
   
   }
 
-  const randerSongList = (list) => {
+  const renderSongList = (list) => {
     return list.length ?  (
       <SongList>
         {
@@ -63,7 +58,7 @@ const Rank = (props) => {
                 <div className="decorate"></div>
                 <span className="update_frequecy">{item.updateFrequency}</span>
               </div>
-              { randerSongList(item.tracks)}
+              { renderSongList(item.tracks)}
             </ListItem>
           )
         })
@@ -73,7 +68,7 @@ const Rank = (props) => {
   }
 
   return (
-    <Container>
+    <Container play={songsCount}>
       <Scroll>
         <div>
           <h1 className="offical" style={displayStyle}>官方榜</h1>
@@ -90,7 +85,8 @@ const Rank = (props) => {
 
 const mapStateToProps = (state) => ({
   rankList: state.getIn(['rank', 'rankList']),
-  loading: state.getIn(['rank', 'loading'])
+  loading: state.getIn(['rank', 'loading']),
+  songsCount: state.getIn(['player', 'playList']).size
 })
 
 const mapDispatchToProps = (dispatch) => {

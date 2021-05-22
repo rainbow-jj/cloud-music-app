@@ -32,6 +32,10 @@ export const getAlbumDetailRequest = (id) => {
 }
 
 // 获取歌手单曲
-export const getSingerInfoRequest = (id) => {
+export const getSingerInfoRequest = id => {
   return axiosInstance.get(`/artists?id=${id}`)
+}
+
+export const getLyricRequest = id => {
+  return axiosInstance.get(`/lyric?id=${id}`)
 }

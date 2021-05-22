@@ -6,7 +6,7 @@ interface ListProps {
   
 }
 
-export const Container = styled.div`
+export const Container = styled.div<any>`
   position: fixed;
   top: 90px;
   bottom: 0;
