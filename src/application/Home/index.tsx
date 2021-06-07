@@ -1,17 +1,18 @@
 import React from 'react';
-import { renderRoutes } from 'react-router-config';
+import { renderRoutes,   } from 'react-router-config';
 import { Top,Tab, TabItem } from './style';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useHistory, } from 'react-router-dom';
 import Player from '../Player';
 
 const Home = (props:any) => {
-  const { route } = props;
+  const history = useHistory();
+  const { route, } = props;
   return (
     <div>
       <Top >
         <span className="iconfont menu">&#xe65c;</span>
         <span className="title">WebApp</span>
-        <span className="iconfont search">&#xe62b;</span>
+        <span className="iconfont search" onClick={() => history.push('/search')}>&#xe62b;</span>
       </Top>
       <Tab>
         <NavLink to="/recommend" activeClassName="selected"><TabItem><span > 推荐 </span></TabItem></NavLink>

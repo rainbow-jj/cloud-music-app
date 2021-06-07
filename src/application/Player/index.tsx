@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { connect } from "react-redux";
-import { changeFullScreen, changePlaying, changeSequencePlayList, changePlayList, changeMode, changeCurrentIndex, changeShowPlayList, changeCurrentSong} from './store/actionCreators';
+import { changeFullScreen, changePlaying, changeSequencePlayList, changePlayList, changeMode, changeCurrentIndex, changeShowPlayList, changeCurrentSong, changeSpeed} from './store/actionCreators';
 import MiniPlayer from './miniPlay';
 import NormalPlayer from './normalPlayer';
 import { getSongUrl, isEmptyObject, findIndex, shuffle } from '../../api/utils';
@@ -18,6 +18,7 @@ function Player(props:any) {
     mode, //播放模式
     currentIndex,
     currentSong:immutableCurrentSong,
+    speed
   } = props;
 
   const { 
@@ -28,6 +29,7 @@ function Player(props:any) {
     changeCurrentSongDispatch,
     changePlayListDispatch, //改变playList
     changeModeDispatch, //改变mode
+    changeSpeedDispatch
     } = props;
   // 当前歌曲播放时间
   const [currentTime, setCurrentTime] = useState<any>();
@@ -65,6 +67,9 @@ function Player(props:any) {
     songReady.current = false; // 把标志位置为 false, 表示现在新的资源没有缓冲完成，不能切歌
     changeCurrentSongDispatch(current); //赋值currentSong
     audioRef.current.src = getSongUrl(current.id);
+    audioRef.current.autoplay = true;
+    // 这里加上对播放速度的控制
+    audioRef.current.playbackRate = speed;
     setTimeout(() => {
       audioRef.current.play().then(() => {
         songReady.current = true;
@@ -74,21 +79,27 @@ function Player(props:any) {
     togglePlayingDispatch(true); //播放状态
     setCurrentTime(0);//从头开始播放
     setDuration((current.dt / 1000) | 0); //时长
-    console.log('playList', playing)
     getLyric(current.id);
     setCurrentTime(0);
     setDuration((current.dt/1000) | 0);
-
+    
   }, [playList, currentIndex]);
 
   useEffect(() => {
     playing ? audioRef.current.play() : audioRef.current.pause();
   }, [playing]);
 
-  const handleLyric = ({lineNum, txt}) => {
-    if(!currentLyric.current) return;
+  const handleLyric = ({ lineNum, txt }) => {
+    if (!currentLyric.current) return;
     currentLineNum.current = lineNum;
-    setPlayingLyric(txt)
+    setPlayingLyric(txt);
+  }
+
+  const clickSpeed = (newSpeed) => {
+    changeSpeedDispatch(newSpeed);
+    audioRef.current.playbackRate = newSpeed;
+    currentLyric.current.changeSpeed(newSpeed);
+    currentLyric.current.seek( currentTime*1000 );
   }
 
   const getLyric = id => {
@@ -97,8 +108,10 @@ function Player(props:any) {
       currentLyric.current.stop();
     }
     // 避免 songReady 恒为false的情况
+    setTimeout(() => {
+      songReady.current = true
+    }, 3000)
     getLyricRequest(id).then((data:any) => {
-      console.log('lrxdata',data.lrc.lyric);
       lyric = data.lrc.lyric;
       if (!lyric) {
         currentLyric.current = null;
@@ -108,6 +121,7 @@ function Player(props:any) {
       currentLyric.current.play();
       currentLineNum.current = 0;
       currentLyric.current.seek(0);
+  
     }).catch(() => {
       songReady.current = true;
       audioRef.current.play()
@@ -117,9 +131,10 @@ function Player(props:any) {
   const clickPlaying = (e, state) => {
     e.stopPropagation();
     togglePlayingDispatch(state)
-    if(currentLyric.current){
-      currentLyric.current.togglePlay(currentTime*1000);
+    if (currentLyric.current){
+      currentLyric.current.togglePlay( currentTime * 1000 );
     }
+
   }
 
   const updateTime = e => {
@@ -139,8 +154,9 @@ function Player(props:any) {
     if (!playing) {
       togglePlayingDispatch(true);
     }
+
     if ( currentLyric.current ) {
-      currentLyric.current.seek(newTime *1000)
+      currentLyric.current.seek( newTime *1000 )
     }
   }
 
@@ -209,19 +225,6 @@ function Player(props:any) {
   
   return (
     <div>
-      { 
-        isEmptyObject(currentSong) ? null :(
-          <MiniPlayer
-            song={currentSong}
-            fullScreen={fullScreen}
-            playing={playing}
-            toggleFullScreen={toggleFullScreenDispatch}
-            togglePlayList={togglePlayListDispatch}
-            clickPlaying={clickPlaying}
-            percent={percent}
-          />
-        )
-      } 
       {
         isEmptyObject(currentSong) ? null : (
           <NormalPlayer 
@@ -240,11 +243,26 @@ function Player(props:any) {
             mode={mode}
             changeMode={changeMode}
             currentLyric={currentLyric.current}
-            currentPlayying={currentPlayingLyric}
+            currentPlayingLyric={currentPlayingLyric}
             currentLineNum={currentLineNum.current}
+            clickSpeed={clickSpeed}
           ></NormalPlayer>
         )
       }
+      {
+        isEmptyObject(currentSong) ? null : (
+          <MiniPlayer
+            song={currentSong}
+            fullScreen={fullScreen}
+            playing={playing}
+            toggleFullScreen={toggleFullScreenDispatch}
+            togglePlayList={togglePlayListDispatch}
+            clickPlaying={clickPlaying}
+            percent={percent}
+          />
+        )
+      }
+    
       <audio ref={audioRef}
         onTimeUpdate={updateTime}
         onEnded={handleEnd}
@@ -264,6 +282,7 @@ const mapStateToProps = state => ({
   currentIndex: state.getIn(['player', 'currentIndex']),
   showPlayList: state.getIn(['player', 'showPlayList']),
   currentSong: state.getIn(['player', 'currentSong']),
+  speed: state.getIn(['player', 'speed'])
 })
 
 const mapDispatchToProps = dispatch => {
@@ -291,6 +310,9 @@ const mapDispatchToProps = dispatch => {
     },
     changePlayListDispatch(data) {
       dispatch(changePlayList(data));
+    },
+    changeSpeedDispatch(data) {
+      dispatch(changeSpeed(data))
     }
 
   }

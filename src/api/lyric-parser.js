@@ -3,25 +3,34 @@ const timeExp = /\[(\d{2,}):(\d{2})(?:\.(\d{2,3}))?]/g
 
 const STATE_PAUSE = 0;
 const STATE_PLAYING = 1;
+
+function noop() {
+}
+
 export default class Lyric {
   /**
    * @params {string} lrc
    * @params {function} handler
   */
-  constructor(lrc, handlder = () => {}) {
+  constructor(lrc, handlder = noop, speed) {
     this.lrc =lrc;
     this.line = []; // 这是解析后的数组 每项包含对应的歌词和时间
     this.handlder = handlder; //回调函数
     this.state = STATE_PAUSE; // 播放状态
     this.curLineIndex = 0;  // 当前播放歌词所在的行数
     this.startStamp = 0; // 歌曲开始播放的饿时间撮
+    this.speed = speed || 1;
+
+
+    this._init();
     this._initLines();
   }
 
   // 解析字符串，生成Lines数组
   _initLines() {
+    // 解析代码
     const lines = this.lrc.split('\n');
-    for(let i = 0; i<lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       let result =  timeExp.exec(line);
       if (!result) continue;
@@ -29,10 +38,10 @@ export default class Lyric {
       const txt = line.replace(timeExp, '').trim(); //把时间戳去掉，只剩下歌词文本
       if(txt) {
         if(result[3].length === 3) {
-          result[3] = result[3]/10;
+          result[3] = result[3] / 10;
         }
         this.lines.push({
-          time: result[1] * 60 * 1000 + (result[3] || 0) * 10,
+          time: result[1] * 60 * 1000 + result[2] * 1000 + (result[3] || 0) * 10,  //转化具体到毫秒的时间，result[3] * 10可理解为（ result / 100）* 1000
           txt
         });
       }
@@ -103,15 +112,18 @@ export default class Lyric {
       delay = line.time - (+new Date() - this.startStamp);
     } else  {
       // 拿上上一行的歌词开始时间，算间隔
-      let preTime = this.lines[this.curLineIndex] ? this.lines[this.curLineIndex-1].time: 0;
+      let preTime = this.lines[this.curLineIndex -1] ? this.lines[this.curLineIndex -1].time: 0;
       delay = line.time - preTime;
     }
     this.timer = setTimeout(() => {
-      this._calHandler(this.curLineIndex);
+      this._calHandler(this.curLineIndex++);
       if(this.curLineIndex < this.lines.length && this.state === STATE_PLAYING) {
         this._playRest();
       }
-    }, delay)
+    }, (delay/this.speed))
   }
 
+  changeSpeed(speed) {
+    this.speed = speed;
+  }
 }

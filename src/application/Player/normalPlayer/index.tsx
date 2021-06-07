@@ -1,17 +1,30 @@
 import React, {useRef, useEffect} from "react";
 import { getName } from "../../../api/utils";
-import { NormalPlayerContainer, Header, Middle, Footer, CDWrapper, Operators, ProgressWrapper, LyricContainer, LyricWrapper } from './style';
+import { NormalPlayerContainer, Header, Middle, Footer, CDWrapper, Operators, ProgressWrapper, LyricContainer, LyricWrapper, List, ListItem } from './style';
 import {CSSTransition}  from 'react-transition-group';
 import animations from 'create-keyframe-animation';
 import { prefixStyle, formatPlayTime } from '../../../api/utils';
 import ProgressBar from '../../../baseUI/progress-bar';
-import { playMode } from "../../../api/config";
+import { list, playMode } from "../../../api/config";
 import Scroll from "../../../baseUI/scroll";
 
 
+
 function NormalPlayer(props) {
-  const { song, fullScreen, playing ,percent, duration, currentTime,mode, } = props;
-  const { toggleFullScreen, clickPlaying, onProgressChange, handlePrev, handleNext, changeMode, togglePlayList, currentLineNum, currentPlayingLyric, currentLyric } = props;
+  const { song, fullScreen, playing ,percent, duration, currentTime,mode,speed, } = props;
+  const { 
+    toggleFullScreen, 
+    clickPlaying, 
+    onProgressChange, 
+    handlePrev, 
+    handleNext, 
+    changeMode, 
+    togglePlayList, 
+    currentLineNum, 
+    currentPlayingLyric, 
+    currentLyric,
+    clickSpeed
+  } = props;
   const normalPlayerRef = useRef<any>();
   const cdWrapperRef = useRef<any>()
   const transform:any = prefixStyle("transform");
@@ -19,6 +32,7 @@ function NormalPlayer(props) {
   const lyricScrollRef = useRef<any>();
   const lyricLineRefs = useRef<any>([]);
 
+  console.log('currentLyric', currentLyric)
   useEffect (() => {
     if (!lyricScrollRef.current) return;
     let bScroll = lyricScrollRef.current.getBScroll();
@@ -30,7 +44,7 @@ function NormalPlayer(props) {
       // 当前歌词行数<=5 直接滚动到最顶端
       bScroll.scrollTo(0, 0 , 1000);
     }
-  },[currentLineNum])
+  },[currentLineNum]);
 
   // 计算偏移的辅助函数
   const _getPosAndScale = () => {
@@ -106,6 +120,7 @@ function NormalPlayer(props) {
     // 一定要注意现在要把 normalPlayer 这个 DOM 给隐藏掉，因为 CSSTransition 的工作只是把动画执行一遍 
     // 不置为 none 现在全屏播放器页面还是存在
     normalPlayerRef.current.style.display = "none";
+    currentState.current = "";
   };
 
   const getPlayMode = () => {
@@ -145,25 +160,29 @@ function NormalPlayer(props) {
             height="100%"/>
         </div>
         <div className="background layer"></div>
-        <Header className="top" onClick={() => toggleFullScreen(false)}>
-          <div className="back">
+        <Header className="top">
+          <div className="back" onClick={() => toggleFullScreen(false)}>
             <i className="iconfont icon-back">&#xe662;</i>
           </div>
-          <h1 className="title">{song.name}</h1>
-          <h2 className="subtitle">{getName(song.ar)}</h2>
+          <div className="text">
+            <h1 className="title">{song.name}</h1>
+            <h2 className="subtitle">{getName(song.ar)}</h2>
+          </div>
         </Header>
-        <Middle ref={cdWrapperRef}>
+        <Middle ref={cdWrapperRef} onClick={toggleCurrentState}>
           <CSSTransition
             timeout={400}
             classNames="fade"
             in={currentState.current !== "lyric"}
           >
-            <CDWrapper style={{visibility:currentState.current !== "lyric" ? "visible" : "hidden"}}
+            <CDWrapper style={{visibility: currentState.current !== "lyric" ? "visible" : "hidden"}}
             >
-              <div className="cd">
-                <img className={`image play ${playing ? "" : "pause"}`} src={song.al.picUrl+"?params=400*400"} alt="img"/>
+              <div className={`needle ${playing? '': 'pause'}`}>
+                <div className="cd">
+                  <img className={`image play ${playing ? "" : "pause"}`} src={song.al.picUrl+"?params=400*400"} alt="img"/>
+                </div>
+                <p className="playing_lyric">{currentPlayingLyric}</p>
               </div>
-              <p className="playing_lyric">{currentPlayingLyric}</p>
             </CDWrapper>
           </CSSTransition>
           <CSSTransition 
@@ -200,6 +219,20 @@ function NormalPlayer(props) {
           </CSSTransition>
         </Middle>
         <Footer className="bottom">
+          <List>
+            <span>快速听歌</span>
+            {
+              list.map((item) => {
+                return (
+                  <ListItem
+                    key={item.key}
+                    className={`${speed === item.ley ? 'selected': ''}`}
+                    onClick={() => clickSpeed(item.key)}
+                  >{item.name}</ListItem>
+                )
+              })
+            }
+          </List>
           <ProgressWrapper>
             <span className="time time-l">{formatPlayTime(currentTime)}</span>
             <div className="progress-bar-wrapper"><ProgressBar
